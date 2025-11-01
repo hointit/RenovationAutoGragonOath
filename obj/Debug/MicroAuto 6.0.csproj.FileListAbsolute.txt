@@ -1,0 +1,6 @@
+G:\microauto-6.9\bin\Debug\MicroAuto 6.0.exe
+G:\microauto-6.9\bin\Debug\MicroAuto 6.0.pdb
+G:\microauto-6.9\obj\Debug\MicroAuto 6.0.csproj.AssemblyReference.cache
+G:\microauto-6.9\obj\Debug\MicroAuto 6.0.csproj.CoreCompileInputs.cache
+G:\microauto-6.9\obj\Debug\MicroAuto 6.0.exe
+G:\microauto-6.9\obj\Debug\MicroAuto 6.0.pdb
