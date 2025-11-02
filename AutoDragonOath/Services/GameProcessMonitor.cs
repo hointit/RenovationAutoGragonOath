@@ -1,4 +1,5 @@
 using AutoDragonOath.Models;
+using AutoDragonOath.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -138,51 +139,16 @@ namespace AutoDragonOath.Services
                 if (mapBase != 0)
                 {
                     int mapId = memoryReader.ReadInt32(mapBase + OFFSET_MAP_ID);
-                    characterInfo.MapName = mapId.ToString();
+                    characterInfo.MapName = SceneReader.Instance.GetSceneNameById(mapId);
                 }
-
                 // Read pet HP
                 int petId = memoryReader.ReadInt32(statsBase + OFFSET_PET_ID);
                 if (petId > 0)
                 {
                     characterInfo.PetHpPercent = ReadPetHp(memoryReader, petId);
                 }
-
                 // Read skills (F1-F12 placeholders - actual skill names not in memory)
                 characterInfo.Skills = GetSkillPlaceholders();
-
-                // Read titles (if offset is known)
-                // NOTE: The TITLE_INFO_OFFSET is currently unknown
-                // To find it, use: new TitleReader(memoryReader).ScanForTitleStructure(statsBase, 5000);
-                // Once found, uncomment the code below and set TITLE_INFO_OFFSET constant
-                /*
-                if (TITLE_INFO_OFFSET > 0)
-                {
-                    try
-                    {
-                        var titleReader = new TitleReader(memoryReader);
-                        int titleInfoAddr = statsBase + TITLE_INFO_OFFSET;
-
-                        var (count, currentIdx) = titleReader.ReadTitleInfo(titleInfoAddr);
-                        characterInfo.TitleCount = count;
-
-                        if (currentIdx >= 0 && currentIdx < count)
-                        {
-                            int titleListAddr = titleInfoAddr + 8;  // Title list starts 8 bytes after (count + currentIndex)
-                            var titles = titleReader.ReadTitleList(titleListAddr);
-                            characterInfo.CurrentTitle = titles[currentIdx].DisplayText;
-                        }
-                        else
-                        {
-                            characterInfo.CurrentTitle = "";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error reading titles: {ex.Message}");
-                    }
-                }
-                */
 
                 return characterInfo;
             }

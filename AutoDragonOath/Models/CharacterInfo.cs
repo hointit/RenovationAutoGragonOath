@@ -21,8 +21,6 @@ namespace AutoDragonOath.Models
         private int _experience;
         private List<SkillInfo> _skills = new List<SkillInfo>();
         private bool _isAutomationEnabled;
-        private string _currentTitle = "";
-        private int _titleCount;
 
         public int ProcessId
         {
@@ -147,27 +145,6 @@ namespace AutoDragonOath.Models
                 OnPropertyChanged(nameof(Status));
             }
         }
-
-        public string CurrentTitle
-        {
-            get => _currentTitle;
-            set
-            {
-                _currentTitle = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public int TitleCount
-        {
-            get => _titleCount;
-            set
-            {
-                _titleCount = value;
-                OnPropertyChanged();
-            }
-        }
-
         // Computed properties for UI display
         public string Position => $"({XCoordinate}, {YCoordinate})";
 

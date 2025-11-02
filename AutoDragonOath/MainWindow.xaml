@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AutoDragonOath"
         xmlns:vm="clr-namespace:AutoDragonOath.ViewModels"
         mc:Ignorable="d"
-        Title="Auto Dragon Oath - Character Monitor" Height="600" Width="1000"
+        Title="Auto Dragon Oath - Character Monitor" Height="650" Width="520"
         Background="#FF2D2D30">
 
     <Window.DataContext>
@@ -102,23 +102,20 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0"
-                       Text="Dragon Oath Characters"
-                       FontSize="24"
-                       FontWeight="Bold"
-                       Foreground="White"
-                       VerticalAlignment="Center"/>
-
             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="Margin" Value="3"/>
+                        <Setter Property="FontSize" Value="12"/>
+                    </Style>
+                </StackPanel.Resources>
                 <Button Content="Refresh" Command="{Binding RefreshCommand}"/>
-                <Button Content="Diagnostic" Click="ButtonDiagnostic_Click" Background="#FFFF9800"/>
-                <Button Content="Scan Map" Click="ButtonScanMap_Click" Background="#FF9C27B0"/>
                 <Button Content="Scan Memory" Command="{Binding OpenScannerCommand}" Background="#FF00BCD4"/>
                 <Button Content="Start Auto" Command="{Binding StartAutoCommand}" Background="#FF4CAF50"/>
                 <Button Content="Stop" Command="{Binding StopAutoCommand}" Background="#FFF44336"/>
             </StackPanel>
         </Grid>
-
         <!-- Character List -->
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding Characters}"
@@ -126,7 +123,7 @@
                   Margin="0,0,0,10">
             <DataGrid.Columns>
                 <!-- Character Name -->
-                <DataGridTextColumn Header="Character" Binding="{Binding CharacterName}" Width="150"/>
+                <DataGridTextColumn Header="Character" Binding="{Binding CharacterName}" Width="100"/>
 
                 <!-- Level (Important) -->
                 <DataGridTextColumn Header="Level" Binding="{Binding Level}" Width="60">
@@ -140,7 +137,7 @@
                 </DataGridTextColumn>
 
                 <!-- HP % -->
-                <DataGridTemplateColumn Header="HP %" Width="80">
+                <DataGridTemplateColumn Header="HP%" Width="50">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="{Binding HpStatus, Converter={StaticResource HpStatusToColorConverter}}"
@@ -155,7 +152,7 @@
                 </DataGridTemplateColumn>
 
                 <!-- MP % -->
-                <DataGridTemplateColumn Header="MP %" Width="80">
+                <DataGridTemplateColumn Header="MP%" Width="50">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Border Background="#FF2196F3" CornerRadius="3" Padding="8,4">
@@ -167,44 +164,13 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
-                <!-- Pet HP % -->
-                <DataGridTemplateColumn Header="Pet %" Width="70">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding PetHpPercent, StringFormat={}{0}%}"
-                                       Foreground="#FFFF9800"
-                                       HorizontalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
                 <!-- Map -->
-                <DataGridTextColumn Header="Map" Binding="{Binding MapName}" Width="100"/>
-
-                <!-- Title -->
-                <DataGridTextColumn Header="Title" Binding="{Binding CurrentTitle}" Width="150">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="#FFB8860B"/>
-                            <Setter Property="FontStyle" Value="Italic"/>
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-
+                <DataGridTextColumn Header="Map" Binding="{Binding MapName}" Width="120"/>
                 <!-- Position -->
-                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="100"/>
-
-                <!-- Experience -->
-                <DataGridTextColumn Header="Experience" Binding="{Binding Experience, StringFormat=N0}" Width="100"/>
-
-                <!-- Status -->
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120">
+                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="100">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="#FF4CAF50"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -226,7 +192,7 @@
 
                 <!-- Character Info -->
                 <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                    <TextBlock Text="Character Information"
+                    <TextBlock Text="{Binding SelectedCharacter.CharacterName}"
                                FontSize="16"
                                FontWeight="Bold"
                                Foreground="White"
@@ -235,11 +201,6 @@
                     <StackPanel Orientation="Horizontal" Margin="0,5">
                         <TextBlock Text="Process ID: " Foreground="#FF9E9E9E" Width="120"/>
                         <TextBlock Text="{Binding SelectedCharacter.ProcessId}" Foreground="White"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <TextBlock Text="Character: " Foreground="#FF9E9E9E" Width="120"/>
-                        <TextBlock Text="{Binding SelectedCharacter.CharacterName}" Foreground="White" FontWeight="Bold"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,5">
