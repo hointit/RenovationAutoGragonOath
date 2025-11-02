@@ -1,0 +1,292 @@
+<Window x:Class="AutoDragonOath.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AutoDragonOath"
+        xmlns:vm="clr-namespace:AutoDragonOath.ViewModels"
+        mc:Ignorable="d"
+        Title="Auto Dragon Oath - Character Monitor" Height="600" Width="1000"
+        Background="#FF2D2D30">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Converter for HP status color -->
+        <local:HpStatusToColorConverter x:Key="HpStatusToColorConverter"/>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Button Style -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#FF007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF1E88E5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DataGrid Style -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="#FF1E1E1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF3E3E42"/>
+            <Setter Property="RowBackground" Value="#FF252526"/>
+            <Setter Property="AlternatingRowBackground" Value="#FF2D2D30"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#FF3E3E42"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+        </Style>
+
+        <!-- DataGridColumnHeader Style -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#FF3E3E42"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="BorderBrush" Value="#FF2D2D30"/>
+        </Style>
+
+        <!-- DataGridRow Style -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="#FF252526"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3E3E42"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FF007ACC"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DataGridCell Style -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Dragon Oath Characters"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       VerticalAlignment="Center"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Refresh" Command="{Binding RefreshCommand}"/>
+                <Button Content="Diagnostic" Click="ButtonDiagnostic_Click" Background="#FFFF9800"/>
+                <Button Content="Scan Map" Click="ButtonScanMap_Click" Background="#FF9C27B0"/>
+                <Button Content="Scan Memory" Command="{Binding OpenScannerCommand}" Background="#FF00BCD4"/>
+                <Button Content="Start Auto" Command="{Binding StartAutoCommand}" Background="#FF4CAF50"/>
+                <Button Content="Stop" Command="{Binding StopAutoCommand}" Background="#FFF44336"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Character List -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Characters}"
+                  SelectedItem="{Binding SelectedCharacter}"
+                  Margin="0,0,0,10">
+            <DataGrid.Columns>
+                <!-- Character Name -->
+                <DataGridTextColumn Header="Character" Binding="{Binding CharacterName}" Width="150"/>
+
+                <!-- Level (Important) -->
+                <DataGridTextColumn Header="Level" Binding="{Binding Level}" Width="60">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Foreground" Value="#FFFFC107"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- HP % -->
+                <DataGridTemplateColumn Header="HP %" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding HpStatus, Converter={StaticResource HpStatusToColorConverter}}"
+                                    CornerRadius="3" Padding="8,4">
+                                <TextBlock Text="{Binding HpPercent, StringFormat={}{0}%}"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- MP % -->
+                <DataGridTemplateColumn Header="MP %" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="#FF2196F3" CornerRadius="3" Padding="8,4">
+                                <TextBlock Text="{Binding MpPercent, StringFormat={}{0}%}"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Pet HP % -->
+                <DataGridTemplateColumn Header="Pet %" Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PetHpPercent, StringFormat={}{0}%}"
+                                       Foreground="#FFFF9800"
+                                       HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Map -->
+                <DataGridTextColumn Header="Map" Binding="{Binding MapName}" Width="100"/>
+
+                <!-- Title -->
+                <DataGridTextColumn Header="Title" Binding="{Binding CurrentTitle}" Width="150">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#FFB8860B"/>
+                            <Setter Property="FontStyle" Value="Italic"/>
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Position -->
+                <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="100"/>
+
+                <!-- Experience -->
+                <DataGridTextColumn Header="Experience" Binding="{Binding Experience, StringFormat=N0}" Width="100"/>
+
+                <!-- Status -->
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#FF4CAF50"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Selected Character Details -->
+        <Border Grid.Row="2"
+                Background="#FF1E1E1E"
+                BorderBrush="#FF3E3E42"
+                BorderThickness="1"
+                Padding="15"
+                Visibility="{Binding SelectedCharacter, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Character Info -->
+                <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                    <TextBlock Text="Character Information"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Margin="0,0,0,10"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Process ID: " Foreground="#FF9E9E9E" Width="120"/>
+                        <TextBlock Text="{Binding SelectedCharacter.ProcessId}" Foreground="White"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Character: " Foreground="#FF9E9E9E" Width="120"/>
+                        <TextBlock Text="{Binding SelectedCharacter.CharacterName}" Foreground="White" FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Level: " Foreground="#FF9E9E9E" Width="120"/>
+                        <TextBlock Text="{Binding SelectedCharacter.Level}" Foreground="#FFFFC107" FontWeight="Bold" FontSize="16"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Map: " Foreground="#FF9E9E9E" Width="120"/>
+                        <TextBlock Text="{Binding SelectedCharacter.MapName}" Foreground="White"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <TextBlock Text="Coordinates: " Foreground="#FF9E9E9E" Width="120"/>
+                        <TextBlock Text="{Binding SelectedCharacter.Position}" Foreground="White"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Skills List -->
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="Skills (F1-F12)"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Margin="0,0,0,10"/>
+
+                    <ItemsControl ItemsSource="{Binding SelectedCharacter.Skills}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,3">
+                                    <Border Background="#FF007ACC"
+                                            CornerRadius="3"
+                                            Padding="6,2"
+                                            MinWidth="40"
+                                            Margin="0,0,10,0">
+                                        <TextBlock Text="{Binding Hotkey}"
+                                                   Foreground="White"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="{Binding SkillName}" Foreground="#FF9E9E9E"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
