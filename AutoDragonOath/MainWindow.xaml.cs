@@ -46,18 +46,24 @@ namespace AutoDragonOath
 
     /// <summary>
     /// Converter for boolean/object to Visibility
+    /// Supports "Inverse" parameter to invert the visibility logic
     /// </summary>
     public class BoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            bool inverse = parameter?.ToString()?.ToLower() == "inverse";
+
             if (value == null)
-                return Visibility.Collapsed;
+                return inverse ? Visibility.Visible : Visibility.Collapsed;
 
             if (value is bool boolValue)
-                return boolValue ? Visibility.Visible : Visibility.Collapsed;
+            {
+                bool result = inverse ? !boolValue : boolValue;
+                return result ? Visibility.Visible : Visibility.Collapsed;
+            }
 
-            return Visibility.Visible;
+            return inverse ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

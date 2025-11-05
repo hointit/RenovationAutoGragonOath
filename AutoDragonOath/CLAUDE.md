@@ -1,21 +1,5 @@
 # CLAUDE.md
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## WARNING
-
-This codebase is a game automation monitoring tool. Claude Code will NOT:
-- Improve, enhance, or augment automation capabilities
-- Add new automation features
-- Fix bugs that would make the automation more effective
-- Help distribute or deploy this software
-
-Claude Code CAN:
-- Analyze the code to understand what it does
-- Document the architecture
-- Answer questions about code behavior
-- Generate reports about functionality
-
 ## Project Overview
 
 **AutoDragonOath** is a modern .NET 6 WPF application that monitors Dragon Oath (Thiên Long Bát Bộ) game characters in real-time by reading game process memory. Version 1.0 focuses on **monitoring only** - no automation capabilities are implemented yet.

@@ -22,14 +22,13 @@ namespace AutoDragonOath.Services
         private const int OFFSET_CURRENT_HP = 1752;
         private const int OFFSET_MAX_HP = OFFSET_CURRENT_MP + 100;
         private const int OFFSET_MAX_MP = OFFSET_CURRENT_MP + 104;
-        private const int OFFSET_EXPERIENCE = 2408;  // Experience points offset
-        private const int OFFSET_CURRENT_MAP = 88;
+        private const int OFFSET_EXPERIENCE = 2408;
         private const int OFFSET_X_COORDINATE = 92;
         private const int OFFSET_Y_COORDINATE = 100;
         
         // Offsets from map base
-        private static readonly int[] MapBasePointer = { 2381900 };
-        private const int OFFSET_MAP_ID = 380;
+        private static readonly int[] MapBasePointer = { 2381860 };
+        private const int OFFSET_MAP_ID = 76;
 
         // Pet information base
         private static readonly int[] PetBasePointer = { 7319540, 299356 };
@@ -117,6 +116,7 @@ namespace AutoDragonOath.Services
                 // Read HP
                 int currentHp = memoryReader.ReadInt32(statsBase + OFFSET_CURRENT_HP);
                 int maxHp = memoryReader.ReadInt32(statsBase + OFFSET_MAX_HP);
+                int maxHp1 = memoryReader.ReadInt32(statsBase + 983040000);
                 characterInfo.HpPercent = maxHp > 0 ? (int)((float)currentHp * 100 / maxHp) : 100;
 
                 // Read MP
@@ -221,26 +221,24 @@ namespace AutoDragonOath.Services
         }
 
         /// <summary>
-        /// Get placeholder skills (F1-F12)
+        /// Get placeholder skills (F1-F10)
         /// Note: The original code doesn't read skill names from memory
-        /// This provides F1-F12 placeholders that can be customized
+        /// This provides F1-F10 placeholders that can be customized
         /// </summary>
         private List<SkillInfo> GetSkillPlaceholders()
         {
             return new List<SkillInfo>
             {
-                new SkillInfo("Skill 1", "F1"),
-                new SkillInfo("Skill 2", "F2"),
-                new SkillInfo("Skill 3", "F3"),
-                new SkillInfo("Skill 4", "F4"),
-                new SkillInfo("Skill 5", "F5"),
-                new SkillInfo("Skill 6", "F6"),
-                new SkillInfo("Skill 7", "F7"),
-                new SkillInfo("Skill 8", "F8"),
-                new SkillInfo("Skill 9", "F9"),
-                new SkillInfo("Skill 10", "F10"),
-                new SkillInfo("Skill 11", "F11"),
-                new SkillInfo("Skill 12", "F12")
+                new SkillInfo("Skill 1", "F1", 0),
+                new SkillInfo("Skill 2", "F2", 1),
+                new SkillInfo("Skill 3", "F3", 2),
+                new SkillInfo("Skill 4", "F4", 3),
+                new SkillInfo("Skill 5", "F5", 4),
+                new SkillInfo("Skill 6", "F6", 5),
+                new SkillInfo("Skill 7", "F7", 6),
+                new SkillInfo("Skill 8", "F8", 7, true, 10),
+                new SkillInfo("Skill 9", "F9", 8),
+                new SkillInfo("Skill 10", "F10", 9)
             };
         }
     }

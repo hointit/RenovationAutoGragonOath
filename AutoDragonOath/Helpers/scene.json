@@ -795,28 +795,6 @@
     "PvpRuler":  0
   },
   {
-    "no":  "scene71",
-    "threadindex":  40,
-    "clientres":  2,
-    "name":  "Đại Lý 2",
-    "active":  1,
-    "file":  "dali.scn",
-    "serverid":  0,
-    "type":  0,
-    "PvpRuler":  0
-  },
-  {
-    "no":  "scene72",
-    "threadindex":  71,
-    "clientres":  2,
-    "name":  "Đại Lý 3",
-    "active":  1,
-    "file":  "dali.scn",
-    "serverid":  0,
-    "type":  0,
-    "PvpRuler":  0
-  },
-  {
     "no":  "scene73",
     "threadindex":  39,
     "clientres":  6,

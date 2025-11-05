@@ -38,7 +38,7 @@ namespace AutoDragonOath.Services
             Debug.WriteLine($"Process {processId} opened. Handle: {_processHandle}, Base: 0x{_gameBaseAddress:X}");
         }
         
-        private IntPtr GetModuleBaseAddress(int processId, string moduleName)
+        public IntPtr GetModuleBaseAddress(int processId, string moduleName)
         {
             try
             {
@@ -233,7 +233,7 @@ namespace AutoDragonOath.Services
         private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
         [DllImport("kernel32.dll")]
-        private static extern bool ReadProcessMemory(IntPtr hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, int lpNumberOfBytesRead);
+        public static extern bool ReadProcessMemory(IntPtr hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool WriteProcessMemory(IntPtr hProcess, int lpBaseAddress, byte[] lpBuffer, uint nSize, out int lpNumberOfBytesWritten);
