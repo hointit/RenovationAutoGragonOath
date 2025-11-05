@@ -36,11 +36,12 @@ namespace AutoDragonOath.Models
         private bool _isAutoRefreshEnabled;
         private int _refreshIntervalSeconds = 60;
         private int _maxLevel = 130;
-        private int _maxLogDisplay = 50;
+        private int _maxLogDisplay = 100;
         private DispatcherTimer? _refreshTimer;
         private GameProcessMonitor? _gameProcessMonitor;
 
         private readonly Dispatcher _dispatcher;
+        private int _countResetTimes = 0;
 
         public CharacterInfo()
         {
@@ -170,6 +171,16 @@ namespace AutoDragonOath.Models
             set
             {
                 _consoleLog = value;
+                OnPropertyChanged();
+            }
+        }
+        
+        public int CountResetTimes
+        {
+            get => _countResetTimes;
+            set
+            {
+                _countResetTimes = value;
                 OnPropertyChanged();
             }
         }
@@ -426,6 +437,7 @@ namespace AutoDragonOath.Models
                         skillExecutor.ExecuteSkill(skill.SkillId);
                         Thread.Sleep(skill.Delay * 200);
                         AddConsoleLog($"Reset Level of  {CharacterName}.");
+                        CountResetTimes++;
                     });
                 }
             }

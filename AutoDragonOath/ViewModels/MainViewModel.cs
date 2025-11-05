@@ -29,7 +29,7 @@ namespace AutoDragonOath.ViewModels
 
         private readonly GameProcessMonitor _gameProcessMonitor;
         private CharacterInfo? _selectedCharacter;
-        private bool _isKeepOnTop;
+        private bool _isKeepOnTop = true;
 
         public bool IsKeepOnTop
         {
