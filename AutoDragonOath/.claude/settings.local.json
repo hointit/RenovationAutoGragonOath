@@ -1,14 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dotnet build:*)",
-      "mcp__ide__getDiagnostics",
-      "Bash(where dumpbin)",
-      "Bash(find:*)",
-      "Bash(while read proj)",
-      "Bash(do echo \"=== $proj ===\")",
-      "Bash(done)",
-      "Bash(ls -la \"G:\\SourceCodeGameTLBB\\Game\\Client\\_Scripts\\VC7.1\\Release\"\" | grep \".dll \")"
+      "Bash(dotnet build:*)"
     ],
     "deny": [],
     "ask": []

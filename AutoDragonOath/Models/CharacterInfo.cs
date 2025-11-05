@@ -24,21 +24,22 @@ namespace AutoDragonOath.Models
         private int _xCoordinate;
         private int _yCoordinate;
         private string _mapName = "Unknown";
+        private int _mapId;
         private int _experience;
         private List<SkillInfo> _skills = new List<SkillInfo>();
         private bool _isAutomationEnabled;
-        private bool _isTestRunning;
-        private string _elapsedTime = "00:00:00";
+        private int _watchedMapId;
+        private string _consoleLog = string.Empty;
+        private System.Collections.Generic.Queue<string> _logQueue = new System.Collections.Generic.Queue<string>();
 
         // Auto-refresh properties
         private bool _isAutoRefreshEnabled;
-        private int _refreshIntervalSeconds = 2;
+        private int _refreshIntervalSeconds = 60;
+        private int _maxLevel = 130;
+        private int _maxLogDisplay = 50;
         private DispatcherTimer? _refreshTimer;
         private GameProcessMonitor? _gameProcessMonitor;
 
-        // Thread and clock management
-        private Thread? _clockThread;
-        private CancellationTokenSource? _cancellationTokenSource;
         private readonly Dispatcher _dispatcher;
 
         public CharacterInfo()
@@ -46,16 +47,6 @@ namespace AutoDragonOath.Models
             _dispatcher = Dispatcher.CurrentDispatcher;
             _gameProcessMonitor = new GameProcessMonitor();
         }
-
-        /// <summary>
-        /// Initialize with GameProcessMonitor dependency (for testing or custom monitor)
-        /// </summary>
-        public CharacterInfo(GameProcessMonitor gameProcessMonitor)
-        {
-            _dispatcher = Dispatcher.CurrentDispatcher;
-            _gameProcessMonitor = gameProcessMonitor;
-        }
-
         public int ProcessId
         {
             get => _processId;
@@ -73,6 +64,7 @@ namespace AutoDragonOath.Models
             {
                 _characterName = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CharacterHeader));
             }
         }
         
@@ -104,6 +96,7 @@ namespace AutoDragonOath.Models
             {
                 _level = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(CharacterHeader));
             }
         }
 
@@ -149,6 +142,38 @@ namespace AutoDragonOath.Models
             }
         }
 
+        public int MapId
+        {
+            get => _mapId;
+            set
+            {
+                _mapId = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WatchedMapDisplay));
+            }
+        }
+
+        public int WatchedMapId
+        {
+            get => _watchedMapId;
+            set
+            {
+                _watchedMapId = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(WatchedMapDisplay));
+            }
+        }
+
+        public string ConsoleLog
+        {
+            get => _consoleLog;
+            set
+            {
+                _consoleLog = value;
+                OnPropertyChanged();
+            }
+        }
+
         public int Experience
         {
             get => _experience;
@@ -177,26 +202,6 @@ namespace AutoDragonOath.Models
                 _isAutomationEnabled = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Status));
-            }
-        }
-
-        public bool IsTestRunning
-        {
-            get => _isTestRunning;
-            set
-            {
-                _isTestRunning = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string ElapsedTime
-        {
-            get => _elapsedTime;
-            set
-            {
-                _elapsedTime = value;
-                OnPropertyChanged();
             }
         }
 
@@ -247,8 +252,53 @@ namespace AutoDragonOath.Models
             }
         }
 
+        /// <summary>
+        /// Maximum level for automation (default: 120)
+        /// </summary>
+        public int MaxLevel
+        {
+            get => _maxLevel;
+            set
+            {
+                if (value < 1)
+                    value = 1; // Minimum level 1
+
+                if (_maxLevel != value)
+                {
+                    _maxLevel = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Maximum number of log entries to display (default: 10)
+        /// </summary>
+        public int MaxLogDisplay
+        {
+            get => _maxLogDisplay;
+            set
+            {
+                if (value < 1)
+                    value = 1; // Minimum 1 log entry
+
+                if (_maxLogDisplay != value)
+                {
+                    _maxLogDisplay = value;
+                    OnPropertyChanged();
+
+                    // Rebuild console log with new limit
+                    UpdateConsoleLog();
+                }
+            }
+        }
+
         // Computed properties for UI display
         public string Position => $"({XCoordinate}, {YCoordinate})";
+
+        public string WatchedMapDisplay => $"Watched Map - {WatchedMapId}";
+
+        public string CharacterHeader => $"{CharacterName} - {Level}";
 
         public string HpStatus
         {
@@ -271,64 +321,42 @@ namespace AutoDragonOath.Models
         }
 
         /// <summary>
-        /// Start the clock thread
+        /// Set the watched map to the current map
         /// </summary>
-        public void StartClock()
+        public void SetWatchedMap()
         {
-            if (IsTestRunning)
-                return;
-
-            IsTestRunning = true;
-            ElapsedTime = "00:00:00";
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            var token = _cancellationTokenSource.Token;
-            var skillExecutor = new SkillExecutor(ProcessId);
-
-            _clockThread = new Thread(() =>
-            {
-                while (!token.IsCancellationRequested)
-                {
-                    Skills.FindAll(skill => skill.IsEnabled).ForEach(skill =>
-                    {
-                        skillExecutor.ExecuteSkill(skill.SkillId);
-                        Thread.Sleep(skill.Delay * 1000);
-                    });
-                }
-            })
-            {
-                IsBackground = true
-            };
-
-            _clockThread.Start();
+            WatchedMapId = MapId;
         }
 
         /// <summary>
-        /// Stop the clock thread
+        /// Add a log entry to the console (keeps only last N entries based on MaxLogDisplay)
         /// </summary>
-        public void StopClock()
+        public void AddConsoleLog(string message)
         {
-            if (!IsTestRunning)
-                return;
+            string timestamp = DateTime.Now.ToString("HH:mm:ss");
+            string logEntry = $"[{timestamp}]: {message}";
 
-            // Cancel the token to signal thread to stop
-            _cancellationTokenSource?.Cancel();
+            _logQueue.Enqueue(logEntry);
 
-            // Wait for thread to finish (with timeout)
-            if (_clockThread != null && _clockThread.IsAlive)
+            // Keep only the last N log entries based on MaxLogDisplay
+            while (_logQueue.Count > _maxLogDisplay)
             {
-                if (!_clockThread.Join(2000)) // Wait max 2 seconds
-                {
-                    // Force abort if still running
-                    _clockThread.Interrupt();
-                }
+                _logQueue.Dequeue();
             }
+            ConsoleLog = string.Join(Environment.NewLine, _logQueue);
+        }
 
-            IsTestRunning = false;
-
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
-            _clockThread = null;
+        /// <summary>
+        /// Update console log display when MaxLogDisplay changes
+        /// </summary>
+        private void UpdateConsoleLog()
+        {
+            // Remove oldest entries if we exceeded the new limit
+            while (_logQueue.Count > _maxLogDisplay)
+            {
+                _logQueue.Dequeue();
+            }
+            ConsoleLog = string.Join(Environment.NewLine, _logQueue);
         }
 
         /// <summary>
@@ -376,7 +404,6 @@ namespace AutoDragonOath.Models
 
             if (updatedChar != null)
             {
-                // Update properties on UI thread (we're already on UI thread due to DispatcherTimer)
                 CharacterName = updatedChar.CharacterName;
                 HpPercent = updatedChar.HpPercent;
                 MpPercent = updatedChar.MpPercent;
@@ -386,7 +413,25 @@ namespace AutoDragonOath.Models
                 YCoordinate = updatedChar.YCoordinate;
                 MapName = updatedChar.MapName;
                 Experience = updatedChar.Experience;
-                // Note: Don't update Skills as they may have user modifications
+                AddConsoleLog($"Refresh Information of {CharacterName}.");
+                if (_level >= _maxLevel)
+                {
+                    var skillExecutor = new SkillExecutor(ProcessId);
+                    Skills.FindAll(skill => skill.IsEnabled).ForEach(skill =>
+                    {
+                        skillExecutor.ExecuteSkill(skill.SkillId);
+                        Thread.Sleep(skill.Delay * 200);
+                        skillExecutor.ExecuteSkill(skill.SkillId);
+                        Thread.Sleep(skill.Delay * 200);
+                        skillExecutor.ExecuteSkill(skill.SkillId);
+                        Thread.Sleep(skill.Delay * 200);
+                        AddConsoleLog($"Reset Level of  {CharacterName}.");
+                    });
+                }
+            }
+            else
+            {
+                AddConsoleLog($"Window of game {CharacterName} has been closed of crashed.");
             }
         }
 
@@ -396,7 +441,6 @@ namespace AutoDragonOath.Models
         public void Dispose()
         {
             StopAutoRefresh();
-            StopClock();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

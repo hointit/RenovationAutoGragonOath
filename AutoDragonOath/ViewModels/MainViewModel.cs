@@ -24,11 +24,22 @@ namespace AutoDragonOath.ViewModels
         private const int PROCESS_VM_OPERATION = 0x0008;
         private const int PROCESS_QUERY_INFORMATION = 0x0400;
         private const int PROCESS_ALL_ACCESS = PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION;
-        
-        
-        
+
+
+
         private readonly GameProcessMonitor _gameProcessMonitor;
         private CharacterInfo? _selectedCharacter;
+        private bool _isKeepOnTop;
+
+        public bool IsKeepOnTop
+        {
+            get => _isKeepOnTop;
+            set
+            {
+                _isKeepOnTop = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<CharacterInfo> Characters { get; }
 
@@ -41,8 +52,12 @@ namespace AutoDragonOath.ViewModels
                 OnPropertyChanged();
                 // Notify that OpenScannerCommand can execute state may have changed
                 ((RelayCommand)OpenScannerCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)StartTestCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)StopTestCommand).RaiseCanExecuteChanged();
+
+                // Bring the selected character's game window to front
+                if (_selectedCharacter != null)
+                {
+                    WindowManager.BringWindowToFront(_selectedCharacter.ProcessId);
+                }
             }
         }
 
@@ -51,8 +66,7 @@ namespace AutoDragonOath.ViewModels
         public ICommand StopAutoCommand { get; }
         public ICommand OpenScannerCommand { get; }
         public ICommand TestSkillCommand { get; }
-        public ICommand StartTestCommand { get; }
-        public ICommand StopTestCommand { get; }
+        public ICommand SetWatchedMapCommand { get; }
 
         public MainViewModel()
         {
@@ -65,8 +79,7 @@ namespace AutoDragonOath.ViewModels
             StopAutoCommand = new RelayCommand(_ => { /* Reserved for future use */ });
             OpenScannerCommand = new RelayCommand(_ => OpenMemoryScanner(), _ => SelectedCharacter != null);
             TestSkillCommand = new RelayCommand(_ => TestSkillFunction(), _ => SelectedCharacter != null);
-            StartTestCommand = new RelayCommand(_ => StartTest(), _ => SelectedCharacter != null && !SelectedCharacter.IsTestRunning);
-            StopTestCommand = new RelayCommand(_ => StopTest(), _ => SelectedCharacter != null && SelectedCharacter.IsTestRunning);
+            SetWatchedMapCommand = new RelayCommand(_ => SetWatchedMap(), _ => SelectedCharacter != null);
 
             // Initial scan
             RefreshCharacters();
@@ -149,33 +162,14 @@ namespace AutoDragonOath.ViewModels
         
 
         /// <summary>
-        /// Start the test with clock
+        /// Set the watched map to the current map
         /// </summary>
-        private void StartTest()
+        private void SetWatchedMap()
         {
             if (SelectedCharacter == null)
                 return;
 
-            SelectedCharacter.StartClock();
-
-            // Update command states
-            ((RelayCommand)StartTestCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)StopTestCommand).RaiseCanExecuteChanged();
-        }
-
-        /// <summary>
-        /// Stop the test
-        /// </summary>
-        private void StopTest()
-        {
-            if (SelectedCharacter == null)
-                return;
-
-            SelectedCharacter.StopClock();
-
-            // Update command states
-            ((RelayCommand)StartTestCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)StopTestCommand).RaiseCanExecuteChanged();
+            SelectedCharacter.SetWatchedMap();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -139,6 +139,7 @@ namespace AutoDragonOath.Services
                 if (mapBase != 0)
                 {
                     int mapId = memoryReader.ReadInt32(mapBase + OFFSET_MAP_ID);
+                    characterInfo.MapId = mapId;
                     characterInfo.MapName = SceneReader.Instance.GetSceneNameById(mapId);
                 }
                 // Read pet HP
